@@ -1,4 +1,4 @@
-##Tic Tac Toe needs no introductions
+## Tic Tac Toe needs no introductions
 
 I decided to code a tic-tac-toe game to play around with React. I soon found out that the official React tutorial *is* a tic-tac-toe game. I _tried_ to avoid looking at theirs when coding mine.
 
