@@ -8,11 +8,14 @@ class App extends Component {
     this.state = {
       game: [],
       message: "",
-      gameOver: false
+      gameOver: false,
+      isPlayerTurn: false
     };
 
-    this.player_token = "X";
-    this.ai_token = "O";
+    this.playerToken = "X";
+    this.aiToken = "O";
+
+    this.move = this.move.bind(this);
   }
  
   componentDidMount() {
@@ -26,16 +29,46 @@ class App extends Component {
     });
 
     if (Math.floor(Math.random() * 2)) {
-      this.setState({message: "You go first."});
+      this.setState({
+        message: "You go first.",
+        isPlayerTurn: true
+      });
     } else {
-      // this._AIACtion();
-      this.setState({message: "I'll start!"});
+      this.setState({
+        message: "I'll start!",
+        isPlayerTurn: false
+      });
+      this.aiAction();
     }
 
   }
 
+  aiAction() {
+    //get best move from minmax
+    //call move()
+    console.log("ai action");
+    this.move(this.aiToken,0);
+  }
+
+  move(token, sq) {
+    console.log("move: " + token + " " + sq);
+    this.setState((prevState) => {
+      let sqs = prevState.game.slice();
+      sqs[sq] = token;
+
+      return {
+        game: sqs,
+        isPlayerTurn: prevState.isPlayerTurn ? false : true
+      }
+    });
+  }
+
   handleClick(index) {
-    console.log("handleClick: " + index);
+    console.log(this.state.isPlayerTurn);
+    if (this.state.isPlayerTurn) {
+      this.move(this.playerToken, index);
+      this.aiAction();
+    }
   }
 
   render() {
@@ -47,7 +80,9 @@ class App extends Component {
         <p className="App-intro">
           {this.state.message}
         </p>
-        <GameBoard game={this.state.game} handleClick={(i) => this.handleClick(i)}/>
+        <GameBoard
+          game={this.state.game}
+          handleClick={(i) => this.handleClick(i)}/>
       </div>
     );
   }
@@ -67,7 +102,9 @@ function GameBoard(props) {
     <Square key={i}
             value={sq}
             cls={cls}
-            onClick={() => props.handleClick(i)}/>
+            onClick={() => {
+              props.handleClick(i)
+            }}/>
     );
   });
 
