@@ -6,7 +6,7 @@
     "react": "^16.2.0",
     "react-dom": "^16.2.0",
     "react-scripts": "1.1.1",
-    "minmaxtictactoe": "git+https://github.com/nherman/minimaxtictactoe.git"
+    "minimaxtictactoe": "git+https://github.com/nherman/minimaxtictactoe.git"
   },
   "scripts": {
     "start": "react-scripts start",
