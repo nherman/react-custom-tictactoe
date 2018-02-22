@@ -20,9 +20,8 @@ class App extends Component {
 
     this.reset = this.reset.bind(this);
     this.handleClick = this.handleClick.bind(this);
-    this.aiAction = this.move.bind(this);
+    this.aiAction = this.aiAction.bind(this);
     this.move = this.move.bind(this);
-    this.updateGameStatus = this.updateGameStatus.bind(this);
     this.generateMinimaxBoard = this.generateMinimaxBoard.bind(this);
   }
  
@@ -46,30 +45,52 @@ class App extends Component {
         message: "I'll start!",
         isPlayerTurn: false
       });
+      this.move(this.aiToken, Math.floor(Math.random() * 8));
+    }
+
+  }
+
+  /* handleClick()
+   * capture user clicks and make move if game is in progress
+   */
+  handleClick(index) {
+    if (!this.state.gameOver) {
+      this.move(this.playerToken, index);
       this.aiAction();
     }
-
   }
 
-  handleClick(index) {
-    if (this.state.isPlayerTurn) {
-      this.move(this.playerToken, index);
-//      this.aiAction();
-    }
-  }
-
+  /* aiAction()
+   * make a move for the ai
+   */
   aiAction() {
-    let board = this.generateMinimaxBoard();
-    console.log(board);
-    let bestMove = minimax.getMove(board, this.aiToken, this.playerToken);
-    console.log(bestMove);
-    this.move(this.aiToken,bestMove.index);
+    this.move(this.aiToken);
   }
 
+
+  /* move()
+   * place token ('X'||'O') on game[square]
+   * if square is not provided, calculate the best move
+  */
   move(token, sq) {
-    console.log("move: " + token + " " + sq);
+
+    //make the move
     this.setState((prevState) => {
       let sqs = prevState.game.slice();
+
+      if (sq === undefined) {
+        let board = this.generateMinimaxBoard(sqs);
+        let bestMove = minimax.getMove(
+                                        board,
+                                        token,
+                                        (token === this.aiToken ? this.playerToken : this.aiToken)
+                                      );
+
+        sq = bestMove.index;
+      } else if (/* TODO: return {} if sqs[sq] is occupied */) {
+
+      }
+
       sqs[sq] = token;
 
       return {
@@ -78,37 +99,36 @@ class App extends Component {
       }
     });
 
-    this.updateGameStatus();
-  }
 
-  updateGameStatus() {
-    let msg = "";
-    let winning_combo = [];
-    let board = this.generateMinimaxBoard();
-    let avail = board.filter(s => s !== this.playerToken && s !== this.aiToken)
-
-    console.log(board);
-    console.log(avail);
+    //check for end game state
+    this.setState((prevState) => {
+      let msg = "";
+      let winning_combo = [];
+      let board = this.generateMinimaxBoard(prevState.game.slice());
+      let avail = board.filter(s => s !== this.playerToken && s !== this.aiToken)
 
 
-    if (minimax.winning(board, this.aiToken)) {
-      msg = "Ha! I never lose."
-      winning_combo = minimax.winning_combo(board, this.aiToken)
-    } else if (minimax.winning(board, this.playerToken)) {
-      msg = "Huh? There must be a bug."
-      winning_combo = minimax.winning_combo(board, this.playerToken)
-    } else if (avail.length === 0) {
-      msg = "Another tie!"
-    }
+      if (minimax.winning(board, this.aiToken)) {
+        msg = "Ha! I never lose."
+        winning_combo = minimax.winning_combo(board, this.aiToken)
+      } else if (minimax.winning(board, this.playerToken)) {
+        msg = "Huh? There must be a bug."
+        winning_combo = minimax.winning_combo(board, this.playerToken)
+      } else if (avail.length === 0) {
+        msg = "Another tie!"
+      }
 
-    if (msg !== "") {
-      this.setState({
-        message: msg,
-        gameOver: true,
-        winningCombo: winning_combo,
-        isPlayerTurn: false
-      });
-    }
+      if (msg !== "") {
+        return {
+          message: msg,
+          gameOver: true,
+          winningCombo: winning_combo,
+          isPlayerTurn: false
+        };
+      }
+
+      return {};
+    });
 
   }
 
